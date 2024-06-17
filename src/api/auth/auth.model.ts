@@ -1,4 +1,3 @@
-import { Session } from "inspector";
 
 export interface SessionModel extends SessionSmallModel {
   userId: string;

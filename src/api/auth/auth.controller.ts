@@ -20,7 +20,7 @@ export const signup = async (req: Request, res: Response) => {
     const newUser = await authService.signup(user);
     const loginUser = await authService.login(
       newUser.username,
-      newUser.password!
+      user.password
     );
     const session = await sessionService.createSession(loginUser._id);
     res.cookie("sessionId", session._id, { httpOnly: true });

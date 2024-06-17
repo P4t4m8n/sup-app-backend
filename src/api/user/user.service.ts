@@ -46,9 +46,11 @@ const getByUsername = async (username: string): Promise<UserModel | null> => {
   if (!result) {
     return null;
   }
+
   const user = {
     _id: result._id.toString(),
     email: result.email,
+    password: result.password,
     username: result.username,
     firstName: result.firstName,
     lastName: result.lastName,

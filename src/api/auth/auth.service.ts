@@ -28,8 +28,9 @@ const signup = async (user: UserModel): Promise<UserModel> => {
   if (!user.password || !user.username) {
     throw new Error("Missing details");
   }
-
+  
   const userExists = await userService.isUserExists(user.username, user.email);
+
   if (userExists) {
     throw new Error("User already exists");
   }
