@@ -9,8 +9,8 @@ import {
 
 export const chatRoutes = express.Router();
 
-chatRoutes.get("/", getChats);
-chatRoutes.get("/:id", getChatById);
+chatRoutes.get("/:userId", getChats);
+chatRoutes.get("/chat/:id", getChatById);
 chatRoutes.post("/", createChat);
 chatRoutes.put("/:id", updateChat);
 chatRoutes.delete("/:id", deleteChat);

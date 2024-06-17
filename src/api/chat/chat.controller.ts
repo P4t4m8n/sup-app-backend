@@ -3,7 +3,7 @@ import { chatService } from "./chat.service";
 
 export const getChats = async (req: Request, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const { userId } = req.params;
     const chats = await chatService.query(userId);
     res.json(chats);
   } catch (err) {
@@ -14,6 +14,7 @@ export const getChats = async (req: Request, res: Response) => {
 export const getChatById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    console.log("id:", id);
     const chat = await chatService.getById(id);
     if (chat) {
       res.json(chat);

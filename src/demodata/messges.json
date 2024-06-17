@@ -1,0 +1,63 @@
+[
+    {
+      
+      "userId": "66703721bb3c300cb28923a2",
+      "text": "Hey Jane, how are you doing today?",
+      "chatId": "66708bf4c979a35d981d3fa7"
+    },
+    {
+      
+      "userId": "66708afca238893aae50ec99",
+      "text": "Hi John, I'm doing well! What's up?",
+      "chatId": "66708bf4c979a35d981d3fa7"
+    },
+    {
+      
+      "userId": "66703721bb3c300cb28923a2",
+      "text": "Not much, just hanging out. What are you up to this weekend?",
+      "chatId": "66708bf4c979a35d981d3fa7"
+    },
+    {
+      
+      "userId": "66708afca238893aae50ec99",
+      "text": "I'm going to a movie with friends. Anything fun planned for you?",
+      "chatId": "66708bf4c979a35d981d3fa7"
+    },
+    {
+      
+      "userId": "66703721bb3c300cb28923a2",
+      "text": "Sounds like fun! I might just relax at home.",
+      "chatId": "66708bffc979a35d981d3fa8"
+    },
+    {
+      
+      "userId": "ali66708afca238893aae50ec99",
+      "text": "Hey David, how's it going?",
+      "chatId": "66708bffc979a35d981d3fa8"
+    },
+    {
+      
+      "userId": "66703721bb3c300cb28923a2",
+      "text": "Doing good Alice, just finished a big project. What about you?",
+      "chatId": "66708bffc979a35d981d3fa8"
+    },
+    {
+      
+      "userId": "ali66708afca238893aae50ec99",
+      "text": "That's awesome! I'm just swamped with schoolwork as usual.",
+      "chatId": "66708bffc979a35d981d3fa8"
+    },
+    {
+      
+      "userId": "66703721bb3c300cb28923a2",
+      "text": "Hang in there! Want to grab coffee sometime this week to catch up?",
+      "chatId": "66708c05c979a35d981d3fa9"
+    },
+    {
+      
+      "userId": "66703721bb3c300cb28923a2",
+      "text": "Sounds good! Let me know what works for you.",
+      "chatId": "66708c05c979a35d981d3fa9"
+    }
+  
+  ]

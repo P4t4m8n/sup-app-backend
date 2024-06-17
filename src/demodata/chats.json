@@ -1,0 +1,26 @@
+[
+    {
+      "users": [
+        "john.doe@example.com",
+        "jane.smith@example.com"
+      ],
+      "name": "Friends Forever",
+      "messages": [
+       
+      ]
+    },
+    {
+      "_id": "chat2_id",  // Replace with actual ID during insert
+      "users": [
+        "alice.johnson@example.com",
+        "david.johnson@example.com"
+      ],
+      "name": "Sibling Chat",
+      "messages": [
+        "message6_id",  // Reference message ID from messages.json
+        "message7_id",
+        "message8_id",
+        "message9_id",
+        "message10_id"
+      
+  

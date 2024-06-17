@@ -38,7 +38,7 @@ import { massageRoutes } from "./api/messages/messages.routes";
 app.use("/api/station", massageRoutes);
 
 import { chatRoutes } from "./api/chat/chat.routes";
-app.use("api/chat", chatRoutes);
+app.use("/api/chat", chatRoutes);
 
 import { setUpSocketAPI } from "./services/socket.service";
 setUpSocketAPI(server);

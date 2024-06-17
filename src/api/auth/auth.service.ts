@@ -2,6 +2,7 @@ import { userService } from "../user/user.service";
 import Cryptr from "cryptr";
 import bcrypt from "bcrypt";
 import { UserModel } from "../user/user.model";
+import { SessionModel } from "./auth.model";
 
 export const cryptr = new Cryptr("smelly-Puk-030");
 
@@ -47,7 +48,7 @@ const getLoginToken = (user: UserModel): string => {
   return cryptr.encrypt(JSON.stringify(userInfo));
 };
 
-const validateToken = (token: string): UserModel => {
+const validateToken = (token: string): SessionModel => {
   const decrypted = cryptr.decrypt(token);
   return JSON.parse(decrypted);
 };

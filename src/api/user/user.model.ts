@@ -11,3 +11,8 @@ export interface UserToCreate {
   password?: string;
   createAt: number;
 }
+
+export interface UserSmallModel {
+  _id: string;
+  username: string;
+}

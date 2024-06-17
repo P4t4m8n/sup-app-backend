@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { authService } from "./auth.service";
 import { sessionService } from "../../services/session.service";
+import { userService } from "../user/user.service";
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
-  console.log("username:", username)
   try {
     const user = await authService.login(username, password);
     const session = await sessionService.createSession(user._id);
@@ -50,16 +50,17 @@ export const logout = async (req: Request, res: Response) => {
   }
 };
 
-export const checkSession = (req: Request, res: Response) => {
+export const checkSession = async (req: Request, res: Response) => {
   const token = req.cookies.sessionId;
-  console.log("token:", token)
+  console.log("token:", token);
   if (!token) {
-    return res.status(401).send({ message: "Not authenticated" });
+    return res.json({ user: null });
   }
 
   try {
     const decrypted = authService.validateToken(token);
-    res.json({ user: decrypted });
+    const user = await userService.getById(decrypted.userId);
+    res.json({ user: user });
   } catch (err) {
     res.status(401).send({ message: "Invalid token" });
   }
