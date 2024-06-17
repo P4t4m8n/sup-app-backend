@@ -3,7 +3,7 @@ import Cryptr from "cryptr";
 import bcrypt from "bcrypt";
 import { UserModel } from "../user/user.model";
 
-const cryptr = new Cryptr(process.env.SECRET!);
+const cryptr = new Cryptr("smelly-Puk-030");
 
 const login = async (
   username: string,
