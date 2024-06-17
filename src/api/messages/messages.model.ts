@@ -1,8 +1,8 @@
-export interface MessageModel extends MassageToCreate {
+export interface MessageModel extends MessagesToCreate {
   _id: string;
 }
 
-export interface MassageToCreate {
+export interface MessagesToCreate {
   text: string;
   userId: string;
   createAt: number;
