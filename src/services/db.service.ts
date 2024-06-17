@@ -3,7 +3,7 @@ import { MongoClient, Db, Collection } from "mongodb";
 let dbConnection: Db | null = null;
 
 const getCollection = async (
-  collectionName: "messages" | "users" | "sessions"
+  collectionName: "messages" | "users" | "sessions"| "chats"
 ): Promise<Collection> => {
   const db = await _connect();
   return db.collection(collectionName);

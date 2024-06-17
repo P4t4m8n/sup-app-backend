@@ -4,7 +4,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 
-
 const app = express();
 const server = http.createServer(app);
 
@@ -38,10 +37,11 @@ app.use("/api/user", userRoutes);
 import { massageRoutes } from "./api/messages/messages.routes";
 app.use("/api/station", massageRoutes);
 
+import { chatRoutes } from "./api/chat/chat.routes";
+app.use("api/chat", chatRoutes);
+
 import { setUpSocketAPI } from "./services/socket.service";
 setUpSocketAPI(server);
-
-
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {

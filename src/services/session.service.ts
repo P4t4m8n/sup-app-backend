@@ -1,10 +1,11 @@
 import { SessionModel, SessionSmallModel } from "../api/auth/auth.model";
+import { cryptr } from "../api/auth/auth.service";
 import { dbService } from "./db.service";
 import { ObjectId } from "mongodb";
 
-const ON_DAY_SESSION_EXPIRY = 1000 * 60 * 60 * 24; 
+const ON_DAY_SESSION_EXPIRY = 1000 * 60 * 60 * 24;
 
-const createSession = async (userId: string): Promise<SessionModel> => {
+const createSession = async (userId: string): Promise<string> => {
   const collection = await dbService.getCollection("sessions");
   const session: SessionModel & { _id?: ObjectId } = {
     userId,
@@ -12,7 +13,9 @@ const createSession = async (userId: string): Promise<SessionModel> => {
     expiresAt: new Date(Date.now() + ON_DAY_SESSION_EXPIRY),
   };
   const result = await collection.insertOne(session);
-  return { ...session, _id: result.insertedId.toString() };
+  return cryptr.encrypt(
+    JSON.stringify({ ...session, _id: result.insertedId.toString() })
+  );
 };
 
 const validateSession = async (

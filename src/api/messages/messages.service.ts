@@ -1,5 +1,5 @@
 import { dbService } from "../../services/db.service";
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { MessageModel, MessagesToCreate } from "./messages.model";
 
 const query = async (filterSortBy = {}) => {
@@ -34,16 +34,27 @@ const create = async (message: MessagesToCreate): Promise<MessageModel> => {
   const collection = await dbService.getCollection("messages");
   const result = await collection.insertOne({
     ...message,
-    createAt: new Date(), // Ensure the creation date is set when inserting
+    createAt: new Date(),
   });
 
-  return {
+  const createdMessage: MessageModel = {
     _id: result.insertedId.toString(),
     userId: message.userId,
     text: message.text,
     createAt: message.createAt,
     chatId: message.chatId,
   };
+
+  const chatCollection = await dbService.getCollection("chats");
+  await chatCollection.updateOne(
+    { _id: new ObjectId(message.chatId) },
+    {
+      // @ts-ignore
+      $push: { messages: createdMessage._id },
+      $set: { updatedAt: new Date() },
+    }
+  );
+  return createdMessage;
 };
 
 const update = async (message: MessageModel): Promise<MessageModel | null> => {
