@@ -16,9 +16,9 @@ const getById = async (id: string): Promise<MessageModel | null> => {
       _id: message._id.toString(),
       userId: message.userId,
       text: message.text,
-      createAt: message.createAt,
       updatedAt: message.updatedAt || null,
       chatId: message.chatId,
+      senderUserName: message.senderUserName,
     };
   }
   return null;
@@ -41,8 +41,8 @@ const create = async (message: MessagesToCreate): Promise<MessageModel> => {
     _id: result.insertedId.toString(),
     userId: message.userId,
     text: message.text,
-    createAt: message.createAt,
     chatId: message.chatId,
+    senderUserName: message.senderUserName,
   };
 
   const chatCollection = await dbService.getCollection("chats");

@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { dbService } from "../../services/db.service";
 import { ChatModel } from "./chat.model";
+import { send } from "process";
 
 const query = async (userId: string): Promise<any[]> => {
   const collection = await dbService.getCollection("chats");
@@ -101,6 +102,7 @@ const getPipeline = (userId: string) => [
             text: "$$message.text",
             userId: "$$message.userId",
             chatId: "$$message.chatId",
+            senderUserName: "$$message.senderUserName",
             createAt: { $toDate: "$$message._id" }, // Extract creation date from _id
           },
         },

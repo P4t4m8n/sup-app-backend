@@ -16,7 +16,7 @@ export const setUpSocketAPI = (server: any) => {
         userId: "",
         chatId: "",
         text,
-        createAt: new Date().getMilliseconds(),
+        senderUserName: "Anonymous",
       };
       await messagesService.create(newMessage);
       gIo.emit("message", newMessage);

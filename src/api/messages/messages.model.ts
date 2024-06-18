@@ -5,9 +5,10 @@ export interface MessageModel extends MessagesToCreate {
 export interface MessagesToCreate {
   text: string;
   userId: string;
-  createAt: number;
   updatedAt?: number | null;
   chatId: string;
+  senderUserName:string
+
 }
 
  
