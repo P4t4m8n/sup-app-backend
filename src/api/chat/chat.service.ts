@@ -4,18 +4,17 @@ import { ChatModel } from "./chat.model";
 
 const query = async (userId: string): Promise<any[]> => {
   const collection = await dbService.getCollection("chats");
-  const pipeline = getPipeline(userId); 
-  console.log("userId:", userId)
+  const pipeline = getPipeline(userId);
 
   const chats = await collection.aggregate(pipeline).toArray();
-  console.log("chats:", chats)
+  console.log("chats:", chats);
 
   return chats.map((chat) => {
     return {
-      _id: chat._id.toString(), 
+      _id: chat._id.toString(),
       name: chat.name,
-      users: chat.users, 
-      messages: chat.messages, 
+      users: chat.users,
+      messages: chat.messages,
     };
   });
 };
@@ -71,34 +70,66 @@ const remove = async (id: string): Promise<boolean> => {
 };
 
 const getPipeline = (userId: string) => [
+  // Match chats that include the given userId
   {
     $match: { users: userId },
   },
+  // Convert `_id` to string to match `chatId` in messages
+  {
+    $addFields: {
+      chatIdString: { $toString: "$_id" },
+    },
+  },
   {
     $lookup: {
-      from: "Messages",
-      localField: "_id",
+      from: "messages",
+      localField: "chatIdString",
       foreignField: "chatId",
       as: "messages",
     },
   },
+  // Preserve the original users array
   {
-    $unwind: "$users",
+    $addFields: {
+      userIds: "$users",
+    },
   },
+  // Unwind the users array to perform lookup on individual user IDs
   {
-    $lookup: {
-      from: "Users",
-      localField: "users", 
-      foreignField: "_id",
-      as: "users",
+    $unwind: "$userIds",
+  },
+  // Convert userId to ObjectId for matching with users collection
+  {
+    $addFields: {
+      userIdObject: { $toObjectId: "$userIds" },
     },
   },
   {
-    // Project desired fields (optional)
+    $lookup: {
+      from: "users",
+      localField: "userIdObject",
+      foreignField: "_id",
+      as: "userObjects",
+    },
+  },
+  // Group back the users to form an array
+  {
+    $group: {
+      _id: "$_id",
+      name: { $first: "$name" },
+      messages: { $first: "$messages" },
+      users: { $push: { $arrayElemAt: ["$userObjects", 0] } },
+    },
+  },
+  // Final projection to clean up the output
+  {
     $project: {
-      _id: 1, // Include other chat fields as needed
-      name: 1, // Optional: Chat name
-      users: "$users", // Array of user objects
+      _id: 1,
+      name: 1,
+      users: {
+        _id: 1,
+        username: 1,
+      },
       messages: 1,
     },
   },
