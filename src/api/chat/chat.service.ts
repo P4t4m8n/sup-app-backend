@@ -80,12 +80,31 @@ const getPipeline = (userId: string) => [
       chatIdString: { $toString: "$_id" },
     },
   },
+  // Lookup messages related to each chat using string fields
   {
     $lookup: {
       from: "messages",
       localField: "chatIdString",
       foreignField: "chatId",
       as: "messages",
+    },
+  },
+  // Add a field to convert message _id to date
+  {
+    $addFields: {
+      messages: {
+        $map: {
+          input: "$messages",
+          as: "message",
+          in: {
+            _id: "$$message._id",
+            text: "$$message.text",
+            userId: "$$message.userId",
+            chatId: "$$message.chatId",
+            createAt: { $toDate: "$$message._id" }, // Extract creation date from _id
+          },
+        },
+      },
     },
   },
   // Preserve the original users array
@@ -104,6 +123,7 @@ const getPipeline = (userId: string) => [
       userIdObject: { $toObjectId: "$userIds" },
     },
   },
+  // Lookup users related to each chat
   {
     $lookup: {
       from: "users",
@@ -128,7 +148,10 @@ const getPipeline = (userId: string) => [
       name: 1,
       users: {
         _id: 1,
+        email: 1,
         username: 1,
+        firstName: 1,
+        lastName: 1,
       },
       messages: 1,
     },
