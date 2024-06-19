@@ -52,7 +52,6 @@ export const logout = async (req: Request, res: Response) => {
 
 export const checkSession = async (req: Request, res: Response) => {
   const token = req.cookies.sessionId;
-  console.log("token:", token);
   if (!token) {
     return res.json({ user: null });
   }

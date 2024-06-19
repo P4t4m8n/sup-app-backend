@@ -8,7 +8,6 @@ const query = async (userId: string): Promise<any[]> => {
   const pipeline = getPipeline(userId);
 
   const chats = await collection.aggregate(pipeline).toArray();
-  console.log("chats:", chats);
 
   return chats.map((chat) => {
     return {

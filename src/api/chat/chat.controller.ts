@@ -14,7 +14,6 @@ export const getChats = async (req: Request, res: Response) => {
 export const getChatById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    console.log("id:", id);
     const chat = await chatService.getById(id);
     if (chat) {
       res.json(chat);

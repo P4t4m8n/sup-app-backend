@@ -40,6 +40,9 @@ app.use("/api/station", massageRoutes);
 import { chatRoutes } from "./api/chat/chat.routes";
 app.use("/api/chat", chatRoutes);
 
+import { FriendRoutes } from "./api/friends/friends.routes";
+app.use("/api/friend", FriendRoutes);
+
 import { setUpSocketAPI } from "./services/socket.service";
 setUpSocketAPI(server);
 
