@@ -3,16 +3,48 @@ import { dbService } from "../../services/db.service";
 import { FriendModel } from "./friends.model";
 
 const query = async (userId: string): Promise<FriendModel[]> => {
-  const collection = await dbService.getCollection("friends");
+  console.log("userId:", userId)
+  const friendsCollection = await dbService.getCollection("friends");
+  const usersCollection = await dbService.getCollection("users");
 
-  const friends = await collection.find({ userId }).toArray();
+  const friends = await friendsCollection
+    .aggregate([
+      {
+        $match: { userId: userId }, // Match userId as string
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { friendIdStr: "$friendId" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$friendIdStr" }] } } }
+          ],
+          as: "friendDetails",
+        },
+      },
+      {
+        $unwind: "$friendDetails",
+      },
+      {
+        $project: {
+          _id: { $toString: "$_id" },
+          userId: 1,
+          friendId: 1,
+          status: 1,
+          friendUsername: "$friendDetails.username",
+        },
+      },
+    ])
+    .toArray();
+  console.log("friends:", friends)
 
   return friends.map((friend) => {
     return {
-      _id: friend._id.toString(),
+      _id: friend._id,
       userId: friend.userId,
       friendId: friend.friendId,
       status: friend.status,
+      userName: friend.friendUsername,
     };
   });
 };

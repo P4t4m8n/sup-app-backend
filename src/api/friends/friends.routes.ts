@@ -1,10 +1,9 @@
 import express from "express";
-import { createFriend, getFriend, getFriends } from "./friends.controller";
+import { createFriend, getFriends, updateFriend } from "./friends.controller";
 
 export const FriendRoutes = express.Router();
 
-FriendRoutes.get("/", getFriends);
-FriendRoutes.get("/:id", getFriend);
-FriendRoutes.post("/edit", createFriend);
-FriendRoutes.put("/edit/:id", createFriend);
+FriendRoutes.get("/:id", getFriends);
+FriendRoutes.post("/", createFriend);
+FriendRoutes.put("/:id", updateFriend);
 FriendRoutes.delete("/:id", createFriend);
