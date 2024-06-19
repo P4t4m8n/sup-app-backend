@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { messagesService } from "../api/messages/messages.service";
+import { MessagesToCreate } from "../api/messages/messages.model";
 
 export const setUpSocketAPI = (server: any) => {
   let gIo = new Server(server, {
@@ -11,15 +12,15 @@ export const setUpSocketAPI = (server: any) => {
   gIo.on("connection", (socket: Socket) => {
     console.log("New client connected");
 
-    socket.on("message", async (text: string) => {
+    socket.on("message", async (message: MessagesToCreate) => {
       const newMessage = {
-        userId: "",
-        chatId: "",
-        text,
-        senderUserName: "Anonymous",
+        userId: message.userId,
+        chatId: message.chatId,
+        text: message.text,
+        senderUserName: message.senderUserName,
       };
-      await messagesService.create(newMessage);
-      gIo.emit("message", newMessage);
+      const savedMessage = await messagesService.create(newMessage);
+      gIo.emit("message", savedMessage);
     });
 
     socket.on("disconnect", () => {
@@ -27,5 +28,3 @@ export const setUpSocketAPI = (server: any) => {
     });
   });
 };
-
-

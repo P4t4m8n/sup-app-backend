@@ -43,17 +43,9 @@ const create = async (message: MessagesToCreate): Promise<MessageModel> => {
     text: message.text,
     chatId: message.chatId,
     senderUserName: message.senderUserName,
+    createAt: new Date(result.insertedId.getTimestamp()),
   };
 
-  const chatCollection = await dbService.getCollection("chats");
-  await chatCollection.updateOne(
-    { _id: new ObjectId(message.chatId) },
-    {
-      // @ts-ignore
-      $push: { messages: createdMessage._id },
-      $set: { updatedAt: new Date() },
-    }
-  );
   return createdMessage;
 };
 

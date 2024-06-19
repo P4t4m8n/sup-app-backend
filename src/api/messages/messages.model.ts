@@ -8,6 +8,7 @@ export interface MessagesToCreate {
   updatedAt?: number | null;
   chatId: string;
   senderUserName:string
+  createAt?: Date;
 
 }
 
