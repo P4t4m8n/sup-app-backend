@@ -107,7 +107,7 @@ const pipelineMany = (userId: ObjectId) => [
           as: "message",
           in: {
             _id: "$$message._id",
-            text: "$$message.text",
+            message: "$$message.message",
             userId: "$$message.userId",
             chatId: "$$message.chatId",
             senderUserName: "$$message.senderUserName",

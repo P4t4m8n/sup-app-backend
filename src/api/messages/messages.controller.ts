@@ -26,13 +26,12 @@ export const getMassageById = async (req: Request, res: Response) => {
 };
 
 export const createMassage = async (req: Request, res: Response) => {
-  const { chatId, userId, message, senderUserName } = req.body;
+  const { chatId, userId, message } = req.body;
   try {
     const newMessage = await messagesService.create(
       chatId,
       userId,
       message,
-      senderUserName
     );
     res.json(newMessage);
   } catch (err) {

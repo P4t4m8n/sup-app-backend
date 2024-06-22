@@ -20,9 +20,8 @@ const queryByChat = async (chatId: string): Promise<MessageModel[]> => {
       _id: message._id,
       userId: message.userId,
       message: message.message,
-      updatedAt: message.updatedAt || null,
       chatId: message.chatId,
-      senderUserName: message.senderUserName,
+      createAt: message._id.getTimestamp(),
     };
   });
 };
@@ -53,15 +52,14 @@ const create = async (
   chatId: string,
   userId: string,
   message: string,
-  senderUserName: string
 ): Promise<MessageModel> => {
   const collection = await dbService.getCollection("messages");
 
   const chatIdObj = new ObjectId(chatId);
   const userIdObj = new ObjectId(userId);
   const result = await collection.insertOne({
-    chatIdObj,
-    userIdObj,
+    chatId:chatIdObj,
+    userId:userIdObj,
     message,
   });
 
@@ -70,7 +68,6 @@ const create = async (
     chatId: chatIdObj,
     message,
     userId: userIdObj,
-    senderUserName,
     createAt: new Date(result.insertedId.getTimestamp()),
   };
 

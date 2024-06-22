@@ -9,6 +9,5 @@ export interface MessagesToCreate extends Document {
   userId: ObjectId;
   updatedAt?: number | null;
   chatId: ObjectId;
-  senderUserName: string;
   createAt?: Date;
 }

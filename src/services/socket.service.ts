@@ -59,17 +59,14 @@ export const setUpSocketAPI = (server: any) => {
       async ({
         chatId,
         message,
-        senderUserName,
       }: {
         chatId: string;
         message: string;
-        senderUserName: string;
       }) => {
         const newMessage = await messagesService.create(
           chatId,
           userId,
           message,
-          senderUserName
         );
         gIo.to(chatId).emit("message", newMessage);
       }
