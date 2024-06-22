@@ -9,7 +9,7 @@ const query = async (filterSortBy: {}): Promise<UserModel[]> => {
   const fixedUsers = users.map((user) => {
     delete user.password;
     return {
-      _id: user._id.toString(),
+      _id: user._id,
       email: user.email,
       username: user.username,
       firstName: user.firstName,
@@ -21,14 +21,14 @@ const query = async (filterSortBy: {}): Promise<UserModel[]> => {
   return fixedUsers;
 };
 
-const getById = async (id: string): Promise<UserModel | null> => {
+const getById = async (id: ObjectId): Promise<UserModel | null> => {
   const collection = await dbService.getCollection("users");
-  const user = await collection.findOne({ _id: new ObjectId(id) });
+  const user = await collection.findOne({ _id: id });
 
   if (user) {
     delete user.password;
     return {
-      _id: user._id.toString(),
+      _id: user._id,
       email: user.email,
       username: user.username,
       firstName: user.firstName,
@@ -48,7 +48,7 @@ const getByUsername = async (username: string): Promise<UserModel | null> => {
   }
 
   const user = {
-    _id: result._id.toString(),
+    _id: result._id,
     email: result.email,
     password: result.password,
     username: result.username,
@@ -73,7 +73,7 @@ const create = async (user: UserToCreate): Promise<UserModel> => {
   });
 
   return {
-    _id: result.insertedId.toString(),
+    _id: result.insertedId,
     email: user.email,
     username: user.username,
     firstName: user.firstName,

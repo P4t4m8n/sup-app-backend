@@ -1,15 +1,14 @@
+import { Document, ObjectId } from "mongodb";
+
 export interface MessageModel extends MessagesToCreate {
-  _id: string;
+  _id: ObjectId;
 }
 
-export interface MessagesToCreate {
-  text: string;
-  userId: string;
+export interface MessagesToCreate extends Document {
+  message: string;
+  userId: ObjectId;
   updatedAt?: number | null;
-  chatId: string;
-  senderUserName:string
+  chatId: ObjectId;
+  senderUserName: string;
   createAt?: Date;
-
 }
-
- 

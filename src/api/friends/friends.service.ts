@@ -3,7 +3,6 @@ import { dbService } from "../../services/db.service";
 import { FriendModel } from "./friends.model";
 
 const query = async (userId: string): Promise<FriendModel[]> => {
-  console.log("userId:", userId)
   const friendsCollection = await dbService.getCollection("friends");
   const usersCollection = await dbService.getCollection("users");
 
@@ -36,7 +35,6 @@ const query = async (userId: string): Promise<FriendModel[]> => {
       },
     ])
     .toArray();
-  console.log("friends:", friends)
 
   return friends.map((friend) => {
     return {
@@ -59,7 +57,7 @@ const getById = async (
 
   if (friend) {
     return {
-      _id: friend._id.toString(),
+      _id: friend._id,
       userId: friend.userId,
       friendId: friend.friendId,
       status: friend.status,
@@ -90,7 +88,7 @@ const create = async (friend: Partial<FriendModel>): Promise<FriendModel> => {
   }
 
   return {
-    _id: _friend.insertedId.toString(),
+    _id: _friend.insertedId,
     userId: friend.userId!,
     friendId: friend.friendId!,
     status: "pending",

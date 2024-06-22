@@ -26,8 +26,10 @@ export const getChatById = async (req: Request, res: Response) => {
 };
 
 export const createChat = async (req: Request, res: Response) => {
+  const users = req.body.users.map((user: any) => user._id);
+
   try {
-    const chat = await chatService.create(req.body);
+    const chat = await chatService.create(users);
     res.json(chat);
   } catch (err) {
     res.status(500).send({ err: "Failed to create chat" });

@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 const ON_DAY_SESSION_EXPIRY = 1000 * 60 * 60 * 24;
 
-const createSession = async (userId: string): Promise<string> => {
+const createSession = async (userId: ObjectId): Promise<string> => {
   const collection = await dbService.getCollection("sessions");
   const session: SessionModel & { _id?: ObjectId } = {
     userId,
@@ -14,7 +14,7 @@ const createSession = async (userId: string): Promise<string> => {
   };
   const result = await collection.insertOne(session);
   return cryptr.encrypt(
-    JSON.stringify({ ...session, _id: result.insertedId.toString() })
+    JSON.stringify({ ...session, _id: result.insertedId })
   );
 };
 
@@ -28,7 +28,7 @@ const validateSession = async (
   });
 
   const session = {
-    _id: sessionData?._id.toString(),
+    _id: sessionData?._id,
     expiresAt: sessionData?.expiresAt,
   };
 

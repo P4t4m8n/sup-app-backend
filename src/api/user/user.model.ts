@@ -1,7 +1,10 @@
+import { ObjectId } from "mongodb";
+
 export interface UserModel extends UserToCreate {
-  _id: string;
+  _id: ObjectId;
   updatedAt?: number | null;
 }
+
 
 export interface UserToCreate {
   email: string;
@@ -13,6 +16,6 @@ export interface UserToCreate {
 }
 
 export interface UserSmallModel {
-  _id: string;
+  _id: ObjectId;
   username: string;
 }

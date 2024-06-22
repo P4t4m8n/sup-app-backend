@@ -1,30 +1,87 @@
 import { Server, Socket } from "socket.io";
 import { messagesService } from "../api/messages/messages.service";
-import { MessagesToCreate } from "../api/messages/messages.model";
+import { socketAuthMiddleware } from "../middlewares/socketAuthMiddleware";
+import { chatService } from "../api/chat/chat.service";
 
 export const setUpSocketAPI = (server: any) => {
-  let gIo = new Server(server, {
+  const gIo = new Server(server, {
     cors: {
-      origin: "*",
+      origin: "http://localhost:4200",
+      credentials: true,
     },
   });
 
-  gIo.on("connection", (socket: Socket) => {
-    console.log("New client connected");
+  interface User {
+    [key: string]: string;
+  }
 
-    socket.on("message", async (message: MessagesToCreate) => {
-      const newMessage = {
-        userId: message.userId,
-        chatId: message.chatId,
-        text: message.text,
-        senderUserName: message.senderUserName,
-      };
-      const savedMessage = await messagesService.create(newMessage);
-      gIo.emit("message", savedMessage);
-    });
+  const users: User = {};
+
+  gIo.use(socketAuthMiddleware);
+
+  gIo.on("connect", (socket: Socket) => {
+    const userId = socket.data.userId;
+    console.log(`User connected [id: ${socket.id}, userId: ${userId}]`);
+    users[userId] = socket.id;
 
     socket.on("disconnect", () => {
-      console.log("Client disconnected");
+      console.log(`User disconnected [id: ${socket.id}]`);
+      delete users[userId];
+    });
+
+    socket.on("startChat", async ({ recipientId }: { recipientId: string }) => {
+      const userIds = [userId, recipientId];
+      let chat = await chatService.findChatByUsers(userIds);
+
+      if (!chat) {
+        chat = await chatService.create(userIds);
+      }
+      
+      console.log("chat:", chat)
+      const chatId = chat._id.toString();
+      socket.join(chatId);
+
+      if (users[recipientId]) {
+        gIo.to(users[recipientId]).emit("chatStarted", {
+          chat,
+        });
+      }
+
+      if (users[userId]) {
+        gIo.to(users[userId]).emit("chatStarted", {
+          chat,
+        });
+      }
+    });
+
+    socket.on(
+      "sendMessage",
+      async ({
+        chatId,
+        message,
+        senderUserName,
+      }: {
+        chatId: string;
+        message: string;
+        senderUserName: string;
+      }) => {
+        const newMessage = await messagesService.create(
+          chatId,
+          userId,
+          message,
+          senderUserName
+        );
+        gIo.to(chatId).emit("message", newMessage);
+      }
+    );
+
+    socket.on("fetchMessages", async ({ chatId }: { chatId: string }) => {
+      const messages = await messagesService.queryByChat(chatId);
+      socket.emit("messages", messages);
+    });
+
+    socket.on("joinChat", (chatId: string) => {
+      socket.join(chatId);
     });
   });
 };

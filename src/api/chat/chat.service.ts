@@ -1,20 +1,19 @@
 import { ObjectId } from "mongodb";
 import { dbService } from "../../services/db.service";
-import { ChatModel } from "./chat.model";
-import { send } from "process";
+import { ChatToSave, ChatModel } from "./chat.model";
 
 const query = async (userId: string): Promise<any[]> => {
   const collection = await dbService.getCollection("chats");
-  const pipeline = getPipeline(userId);
+  const pipeline = pipelineMany(new ObjectId(userId));
 
   const chats = await collection.aggregate(pipeline).toArray();
-
+  if (!chats) return [];
   return chats.map((chat) => {
     return {
       _id: chat._id.toString(),
       name: chat.name,
       users: chat.users,
-      messages: chat.messages,
+      messages: chat.messages || [],
     };
   });
 };
@@ -25,23 +24,24 @@ const getById = async (id: string): Promise<ChatModel | null> => {
 
   if (!chat) return null;
   return {
-    _id: chat._id.toString(),
+    _id: chat._id,
     users: chat.users,
     name: chat.name,
   };
 };
 
-const create = async (chat: ChatModel): Promise<ChatModel> => {
+const create = async (userIds: string[]): Promise<ChatModel> => {
   const collection = await dbService.getCollection("chats");
-
-  const result = await collection.insertOne({
-    ...chat,
-    _id: new ObjectId(chat._id),
-  });
+  const chatToSave = buildChatToSave(userIds);
+  const result = await collection.insertOne({ ...chatToSave });
+  const pipeline = pipelineOne(result.insertedId);
+  const chat = await collection.aggregate(pipeline).toArray();
 
   return {
-    ...chat,
-    _id: result.insertedId.toString(),
+    _id: chat[0]._id.toString(),
+    name: chat[0].name,
+    users: chat[0].users,
+    messages: chat[0].messages || [],
   };
 };
 
@@ -57,7 +57,7 @@ const update = async (
 
   if (!result) return null;
   return {
-    _id: result.value._id.toString(),
+    _id: result.value._id,
     users: result.value.users,
     name: result.value.name,
   };
@@ -69,22 +69,31 @@ const remove = async (id: string): Promise<boolean> => {
   return result.deletedCount === 1;
 };
 
-const getPipeline = (userId: string) => [
+const findChatByUsers = async (
+  userIds: string[]
+): Promise<ChatModel | null> => {
+  const collection = await dbService.getCollection("chats");
+  const chat = await collection.findOne({ users: { $all: userIds } });
+
+  if (!chat) return null;
+  return {
+    _id: chat._id,
+    users: chat.users,
+    name: chat.name,
+  };
+};
+
+const pipelineMany = (userId: ObjectId) => [
   // Match chats that include the given userId
   {
     $match: { users: userId },
   },
-  // Convert `_id` to string to match `chatId` in messages
-  {
-    $addFields: {
-      chatIdString: { $toString: "$_id" },
-    },
-  },
+
   // Lookup messages related to each chat using string fields
   {
     $lookup: {
       from: "messages",
-      localField: "chatIdString",
+      localField: "_id",
       foreignField: "chatId",
       as: "messages",
     },
@@ -118,17 +127,12 @@ const getPipeline = (userId: string) => [
   {
     $unwind: "$userIds",
   },
-  // Convert userId to ObjectId for matching with users collection
-  {
-    $addFields: {
-      userIdObject: { $toObjectId: "$userIds" },
-    },
-  },
+
   // Lookup users related to each chat
   {
     $lookup: {
       from: "users",
-      localField: "userIdObject",
+      localField: "userIds",
       foreignField: "_id",
       as: "userObjects",
     },
@@ -149,15 +153,82 @@ const getPipeline = (userId: string) => [
       name: 1,
       users: {
         _id: 1,
-        email: 1,
         username: 1,
-        firstName: 1,
-        lastName: 1,
       },
       messages: 1,
     },
   },
 ];
+
+const pipelineOne = (chatId: ObjectId) => [
+  {
+    $match: { _id: chatId },
+  },
+  {
+    $lookup: {
+      from: "messages",
+      localField: "_id",
+      foreignField: "chatId",
+      as: "messages",
+    },
+  },
+  {
+    $addFields: {
+      messages: {
+        $map: {
+          input: "$messages",
+          as: "message",
+          in: {
+            _id: "$$message._id",
+            text: "$$message.text",
+            userId: "$$message.userId",
+            chatId: "$$message.chatId",
+            senderUserName: "$$message.senderUserName",
+            createAt: { $toDate: "$$message._id" }, // Extract creation date from _id
+          },
+        },
+      },
+    },
+  },
+  {
+    $unwind: "$users",
+  },
+  {
+    $lookup: {
+      from: "users",
+      localField: "users", // This should be 'users', which contains user IDs
+      foreignField: "_id",
+      as: "userObjects",
+    },
+  },
+  {
+    $group: {
+      _id: "$_id",
+      name: { $first: "$name" },
+      messages: { $first: "$messages" },
+      users: { $push: { $arrayElemAt: ["$userObjects", 0] } },
+    },
+  },
+  {
+    $project: {
+      _id: 1,
+      name: 1,
+      users: {
+        _id: 1,
+        username: 1,
+      },
+      messages: 1,
+    },
+  },
+];
+
+const buildChatToSave = (userIds: string[]): ChatToSave => {
+  const objectUserIds = userIds.map((userId) => new ObjectId(userId));
+  return {
+    users: objectUserIds,
+    name: "",
+  };
+};
 
 export const chatService = {
   query,
@@ -165,4 +236,5 @@ export const chatService = {
   create,
   update,
   remove,
+  findChatByUsers,
 };

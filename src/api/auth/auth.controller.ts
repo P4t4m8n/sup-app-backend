@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { authService } from "./auth.service";
 import { sessionService } from "../../services/session.service";
 import { userService } from "../user/user.service";
+import { ObjectId } from "mongodb";
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -58,7 +59,9 @@ export const checkSession = async (req: Request, res: Response) => {
 
   try {
     const decrypted = authService.validateToken(token);
-    const user = await userService.getById(decrypted.userId);
+
+    const userId = new ObjectId(decrypted.userId);
+    const user = await userService.getById(userId);
     res.json({ user: user });
   } catch (err) {
     res.status(401).send({ message: "Invalid token" });

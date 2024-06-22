@@ -1,6 +1,8 @@
+import { ObjectId } from "mongodb";
+
 export interface FriendModel {
-  _id: string;
-  userId: string;
-  friendId: string;
+  _id: ObjectId;
+  userId: ObjectId;
+  friendId: ObjectId;
   status: "pending" | "accepted" | "rejected";
 }

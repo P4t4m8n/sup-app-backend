@@ -1,11 +1,30 @@
 import { dbService } from "../../services/db.service";
 import { ObjectId } from "mongodb";
-import { MessageModel, MessagesToCreate } from "./messages.model";
+import { MessageModel } from "./messages.model";
 
-const query = async (filterSortBy = {}) => {
+const queryByUser = async (userId: string) => {
   const collection = await dbService.getCollection("messages");
-  const messages = await collection.find().sort(filterSortBy).toArray();
+  const messages = await collection
+    .find({ owner: { _id: new ObjectId(userId) } })
+    .toArray();
   return messages;
+};
+
+const queryByChat = async (chatId: string): Promise<MessageModel[]> => {
+  const collection = await dbService.getCollection("messages");
+  const messages = await collection
+    .find({ chatId: new ObjectId(chatId) })
+    .toArray();
+  return messages.map((message) => {
+    return {
+      _id: message._id,
+      userId: message.userId,
+      message: message.message,
+      updatedAt: message.updatedAt || null,
+      chatId: message.chatId,
+      senderUserName: message.senderUserName,
+    };
+  });
 };
 
 const getById = async (id: string): Promise<MessageModel | null> => {
@@ -13,9 +32,9 @@ const getById = async (id: string): Promise<MessageModel | null> => {
   const message = await collection.findOne({ _id: new ObjectId(id) });
   if (message) {
     return {
-      _id: message._id.toString(),
+      _id: message._id,
       userId: message.userId,
-      text: message.text,
+      message: message.message,
       updatedAt: message.updatedAt || null,
       chatId: message.chatId,
       senderUserName: message.senderUserName,
@@ -30,39 +49,52 @@ const remove = async (id: string): Promise<boolean> => {
   return result.deletedCount === 1;
 };
 
-const create = async (message: MessagesToCreate): Promise<MessageModel> => {
+const create = async (
+  chatId: string,
+  userId: string,
+  message: string,
+  senderUserName: string
+): Promise<MessageModel> => {
   const collection = await dbService.getCollection("messages");
+
+  const chatIdObj = new ObjectId(chatId);
+  const userIdObj = new ObjectId(userId);
   const result = await collection.insertOne({
-    ...message,
-    createAt: new Date(),
+    chatIdObj,
+    userIdObj,
+    message,
   });
 
   const createdMessage: MessageModel = {
-    _id: result.insertedId.toString(),
-    userId: message.userId,
-    text: message.text,
-    chatId: message.chatId,
-    senderUserName: message.senderUserName,
+    _id: result.insertedId,
+    chatId: chatIdObj,
+    message,
+    userId: userIdObj,
+    senderUserName,
     createAt: new Date(result.insertedId.getTimestamp()),
   };
 
   return createdMessage;
 };
 
-const update = async (message: MessageModel): Promise<MessageModel | null> => {
+const update = async (
+  message: string,
+  messageId: string
+): Promise<MessageModel | null> => {
   const collection = await dbService.getCollection("messages");
   const result = await collection.updateOne(
-    { _id: new ObjectId(message._id) },
-    { $set: { text: message.text, updatedAt: message.updatedAt } }
+    { _id: new ObjectId(messageId) },
+    { $set: { message: message, updatedAt: new Date() } }
   );
   if (result.modifiedCount === 1) {
-    return message;
+    return result as unknown as MessageModel;
   }
   return null;
 };
 
 export const messagesService = {
-  query,
+  queryByUser,
+  queryByChat,
   getById,
   remove,
   create,

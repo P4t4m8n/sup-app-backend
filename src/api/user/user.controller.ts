@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { userService } from "./user.service";
 import { Request, Response } from "express";
 
@@ -13,7 +14,8 @@ export const getUsers = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const user = await userService.getById(id);
+    const objectId = new ObjectId(id);
+    const user = await userService.getById(objectId);
     if (user) {
       res.json(user);
     } else {

@@ -1,11 +1,12 @@
+import { ObjectId } from "mongodb";
 
 export interface SessionModel extends SessionSmallModel {
-  userId: string;
+  userId: ObjectId;
   createdAt: Date;
 }
 
 export interface SessionSmallModel {
-  _id?: string;
+  _id?: ObjectId;
   expiresAt: Date;
 
 }
