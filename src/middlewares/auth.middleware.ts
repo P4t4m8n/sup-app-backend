@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { sessionService } from "../services/session.service";
+import { SessionSmallModel } from "../api/auth/auth.model";
 
 interface CustomRequest extends Request {
-  session: any;
+  session: SessionSmallModel;
 }
 
 export const requireAuth = async (

@@ -3,8 +3,11 @@ import { messagesService } from "../api/messages/messages.service";
 import { socketAuthMiddleware } from "../middlewares/socketAuthMiddleware";
 import { chatService } from "../api/chat/chat.service";
 import { ChatType } from "../api/chat/chat.model";
+import http from "http";
 
-export const setUpSocketAPI = (server: any) => {
+export const setUpSocketAPI = (
+  server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>
+) => {
   const gIo = new Server(server, {
     cors: {
       origin: "http://localhost:4200",
