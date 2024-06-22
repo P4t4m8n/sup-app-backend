@@ -48,8 +48,15 @@ export const createFriend = async (req: Request, res: Response) => {
 };
 
 export const updateFriend = async (req: Request, res: Response) => {
+  const friendToUpdate = {
+    userId: req.body.userId,
+    friendId: req.body.friendId,
+    status: req.body.status,
+    _id: req.body._id,
+  };
+
   try {
-    const friend = await friendService.update(req.body);
+    const friend = await friendService.update(friendToUpdate);
     if (friend) {
       res.json(friend);
     } else {

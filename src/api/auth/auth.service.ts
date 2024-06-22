@@ -1,7 +1,7 @@
 import { userService } from "../user/user.service";
 import Cryptr from "cryptr";
 import bcrypt from "bcrypt";
-import { UserModel } from "../user/user.model";
+import { UserModel, UserToCreate } from "../user/user.model";
 import { SessionModel } from "./auth.model";
 
 export const cryptr = new Cryptr("smelly-Puk-030");
@@ -24,12 +24,12 @@ const login = async (
   return user;
 };
 
-const signup = async (user: UserModel): Promise<UserModel> => {
+const signup = async (user: UserToCreate): Promise<UserModel> => {
   const saltRounds = 10;
   if (!user.password || !user.username) {
     throw new Error("Missing details");
   }
-  
+
   const userExists = await userService.isUserExists(user.username, user.email);
 
   if (userExists) {
@@ -40,14 +40,6 @@ const signup = async (user: UserModel): Promise<UserModel> => {
   return userService.create({ ...user, password: hash });
 };
 
-const getLoginToken = (user: UserModel): string => {
-  const userInfo = {
-    _id: user._id,
-    username: user.username,
-  };
-  return cryptr.encrypt(JSON.stringify(userInfo));
-};
-
 const validateToken = (token: string): SessionModel => {
   const decrypted = cryptr.decrypt(token);
   return JSON.parse(decrypted);
@@ -56,6 +48,5 @@ const validateToken = (token: string): SessionModel => {
 export const authService = {
   login,
   signup,
-  getLoginToken,
   validateToken,
 };

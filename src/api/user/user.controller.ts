@@ -14,8 +14,7 @@ export const getUsers = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const objectId = new ObjectId(id);
-    const user = await userService.getById(objectId);
+    const user = await userService.getById(id);
     if (user) {
       res.json(user);
     } else {
@@ -27,8 +26,15 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
+  const { email, username, firstName, lastName, password } = req.body;
   try {
-    const user = await userService.create(req.body);
+    const user = await userService.create({
+      email,
+      username,
+      firstName,
+      lastName,
+      password,
+    });
     res.json(user);
   } catch (err) {
     res.status(500).send({ err: "Failed to create user" });
@@ -36,8 +42,16 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
+  const { email, username, firstName, lastName, password, _id } = req.body;
+
   try {
-    const user = await userService.update(req.body);
+    const user = await userService.update({
+      email,
+      username,
+      firstName,
+      lastName,
+      _id,
+    });
     if (user) {
       res.json(user);
     } else {

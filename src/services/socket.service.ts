@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { messagesService } from "../api/messages/messages.service";
 import { socketAuthMiddleware } from "../middlewares/socketAuthMiddleware";
 import { chatService } from "../api/chat/chat.service";
+import { ChatType } from "../api/chat/chat.model";
 
 export const setUpSocketAPI = (server: any) => {
   const gIo = new Server(server, {
@@ -29,44 +30,48 @@ export const setUpSocketAPI = (server: any) => {
       delete users[userId];
     });
 
-    socket.on("startChat", async ({ recipientId }: { recipientId: string }) => {
-      const userIds = [userId, recipientId];
-      let chat = await chatService.findChatByUsers(userIds);
+    socket.on(
+      "startChat",
+      async ({
+        recipientId,
+        type,
+        name,
+      }: {
+        recipientId: string;
+        type: ChatType;
+        name: string;
+      }) => {
+        const userIds = [userId, recipientId];
+        let chat = await chatService.findChatByUsers(userIds);
 
-      if (!chat) {
-        chat = await chatService.create(userIds);
-      }
-      
-      console.log("chat:", chat)
-      const chatId = chat._id.toString();
-      socket.join(chatId);
+        if (!chat) {
+          chat = await chatService.create(userIds, type, name);
+        }
 
-      if (users[recipientId]) {
-        gIo.to(users[recipientId]).emit("chatStarted", {
-          chat,
-        });
-      }
+        const chatId = chat._id.toString();
+        socket.join(chatId);
 
-      if (users[userId]) {
-        gIo.to(users[userId]).emit("chatStarted", {
-          chat,
-        });
+        if (users[recipientId]) {
+          gIo.to(users[recipientId]).emit("chatStarted", {
+            chat,
+          });
+        }
+
+        if (users[userId]) {
+          gIo.to(users[userId]).emit("chatStarted", {
+            chat,
+          });
+        }
       }
-    });
+    );
 
     socket.on(
       "sendMessage",
-      async ({
-        chatId,
-        message,
-      }: {
-        chatId: string;
-        message: string;
-      }) => {
+      async ({ chatId, message }: { chatId: string; message: string }) => {
         const newMessage = await messagesService.create(
           chatId,
           userId,
-          message,
+          message
         );
         gIo.to(chatId).emit("message", newMessage);
       }

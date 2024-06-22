@@ -7,9 +7,14 @@ export interface ChatModel {
   users: UserSmallModel[];
   name: string;
   messages?: MessageModel[];
+  type: ChatType;
+
 }
 
 export interface ChatToSave {
   users: ObjectId[];
   name: string;
+  type: ChatType;
 }
+
+export type ChatType = "private" | "group";

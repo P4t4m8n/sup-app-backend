@@ -9,6 +9,8 @@ const server = http.createServer(app);
 
 app.use(cookieParser());
 app.use(express.json());
+require('dotenv').config();
+
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.resolve("public")));

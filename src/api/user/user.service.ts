@@ -21,9 +21,9 @@ const query = async (filterSortBy: {}): Promise<UserModel[]> => {
   return fixedUsers;
 };
 
-const getById = async (id: ObjectId): Promise<UserModel | null> => {
+const getById = async (id: string): Promise<UserModel | null> => {
   const collection = await dbService.getCollection("users");
-  const user = await collection.findOne({ _id: id });
+  const user = await collection.findOne({ _id: new ObjectId(id) });
 
   if (user) {
     delete user.password;

@@ -1,19 +1,22 @@
 import { ObjectId } from "mongodb";
 import { dbService } from "../../services/db.service";
-import { ChatToSave, ChatModel } from "./chat.model";
+import { ChatToSave, ChatModel, ChatType } from "./chat.model";
 
-const query = async (userId: string): Promise<any[]> => {
+const query = async (userId: string): Promise<ChatModel[]> => {
   const collection = await dbService.getCollection("chats");
   const pipeline = pipelineMany(new ObjectId(userId));
 
-  const chats = await collection.aggregate(pipeline).toArray();
+  const chats: ChatModel[] | null = (await collection
+    .aggregate(pipeline)
+    .toArray()) as ChatModel[] | null;
   if (!chats) return [];
   return chats.map((chat) => {
     return {
-      _id: chat._id.toString(),
+      _id: chat._id,
       name: chat.name,
       users: chat.users,
       messages: chat.messages || [],
+      type: chat.type,
     };
   });
 };
@@ -27,12 +30,17 @@ const getById = async (id: string): Promise<ChatModel | null> => {
     _id: chat._id,
     users: chat.users,
     name: chat.name,
+    type: chat.type,
   };
 };
 
-const create = async (userIds: string[]): Promise<ChatModel> => {
+const create = async (
+  userIds: string[],
+  type: ChatType,
+  name: string
+): Promise<ChatModel> => {
   const collection = await dbService.getCollection("chats");
-  const chatToSave = buildChatToSave(userIds);
+  const chatToSave = buildChatToSave(userIds, type, name);
   const result = await collection.insertOne({ ...chatToSave });
   const pipeline = pipelineOne(result.insertedId);
   const chat = await collection.aggregate(pipeline).toArray();
@@ -42,6 +50,7 @@ const create = async (userIds: string[]): Promise<ChatModel> => {
     name: chat[0].name,
     users: chat[0].users,
     messages: chat[0].messages || [],
+    type: chat[0].type,
   };
 };
 
@@ -60,6 +69,7 @@ const update = async (
     _id: result.value._id,
     users: result.value.users,
     name: result.value.name,
+    type: result.value.type,
   };
 };
 
@@ -80,6 +90,7 @@ const findChatByUsers = async (
     _id: chat._id,
     users: chat.users,
     name: chat.name,
+    type: chat.type,
   };
 };
 
@@ -222,11 +233,16 @@ const pipelineOne = (chatId: ObjectId) => [
   },
 ];
 
-const buildChatToSave = (userIds: string[]): ChatToSave => {
+const buildChatToSave = (
+  userIds: string[],
+  type: ChatType | undefined,
+  name: string | undefined
+): ChatToSave => {
   const objectUserIds = userIds.map((userId) => new ObjectId(userId));
   return {
     users: objectUserIds,
-    name: "",
+    name: name || "",
+    type: type || "private",
   };
 };
 

@@ -4,19 +4,22 @@ import { FriendModel } from "./friends.model";
 
 const query = async (userId: string): Promise<FriendModel[]> => {
   const friendsCollection = await dbService.getCollection("friends");
-  const usersCollection = await dbService.getCollection("users");
 
   const friends = await friendsCollection
     .aggregate([
       {
-        $match: { userId: userId }, // Match userId as string
+        $match: { userId: new ObjectId(userId) },
       },
       {
         $lookup: {
           from: "users",
           let: { friendIdStr: "$friendId" },
           pipeline: [
-            { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$friendIdStr" }] } } }
+            {
+              $match: {
+                $expr: { $eq: ["$_id", { $toObjectId: "$$friendIdStr" }] },
+              },
+            },
           ],
           as: "friendDetails",
         },
@@ -53,7 +56,10 @@ const getById = async (
 ): Promise<FriendModel | null> => {
   const collection = await dbService.getCollection("friends");
 
-  const friend = await collection.findOne({ userId, friendId });
+  const friend = await collection.findOne({
+    userId: new ObjectId(userId),
+    friendId: new ObjectId(friendId),
+  });
 
   if (friend) {
     return {
@@ -71,15 +77,18 @@ const create = async (friend: Partial<FriendModel>): Promise<FriendModel> => {
   const collection = await dbService.getCollection("friends");
 
   const friendExists = await collection.findOne({
-    $and: [{ userId: friend.userId }, { friendId: friend.friendId }],
+    $and: [
+      { userId: new ObjectId(friend.userId) },
+      { friendId: new ObjectId(friend.friendId) },
+    ],
   });
 
   if (friendExists) {
     throw new Error("Friend already exists");
   }
   const _friend = await collection.insertOne({
-    userId: friend.userId,
-    friendId: friend.friendId,
+    userId: new ObjectId(friend.userId),
+    friendId: new ObjectId(friend.friendId),
     status: "pending",
   });
 
@@ -101,7 +110,7 @@ const update = async (friend: FriendModel): Promise<FriendModel> => {
   const collection = await dbService.getCollection("friends");
 
   const result = await collection.updateOne(
-    { userId: userId, friendId: friendId },
+    { userId: new ObjectId(userId), friendId: new ObjectId(friendId) },
     { $set: { status: friend.status } }
   );
 

@@ -22,8 +22,9 @@ export const login = async (req: Request, res: Response) => {
 
 export const signup = async (req: Request, res: Response) => {
   const user = req.body;
+  const { username, firstName, lastName, email, password } = req.body;
   try {
-    const newUser = await authService.signup(user);
+    const newUser = await authService.signup({ username, firstName, lastName, email, password });
     const loginUser = await authService.login(newUser.username, user.password);
     const session = await sessionService.createSession(loginUser._id);
     res.cookie("sessionId", session, {

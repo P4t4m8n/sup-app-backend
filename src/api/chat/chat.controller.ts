@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { chatService } from "./chat.service";
+import { UserModel } from "../user/user.model";
 
 export const getChats = async (req: Request, res: Response) => {
   try {
@@ -26,10 +27,11 @@ export const getChatById = async (req: Request, res: Response) => {
 };
 
 export const createChat = async (req: Request, res: Response) => {
-  const users = req.body.users.map((user: any) => user._id);
+  const users = req.body.users.map((user: UserModel) => user._id);
+  const { type, name } = req.body;
 
   try {
-    const chat = await chatService.create(users);
+    const chat = await chatService.create(users, type, name);
     res.json(chat);
   } catch (err) {
     res.status(500).send({ err: "Failed to create chat" });
