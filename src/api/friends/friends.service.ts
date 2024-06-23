@@ -4,40 +4,8 @@ import { FriendModel } from "./friends.model";
 
 const query = async (userId: string): Promise<FriendModel[]> => {
   const friendsCollection = await dbService.getCollection("friends");
-
-  const friends = await friendsCollection
-    .aggregate([
-      {
-        $match: { userId: new ObjectId(userId) },
-      },
-      {
-        $lookup: {
-          from: "users",
-          let: { friendIdStr: "$friendId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$_id", { $toObjectId: "$$friendIdStr" }] },
-              },
-            },
-          ],
-          as: "friendDetails",
-        },
-      },
-      {
-        $unwind: "$friendDetails",
-      },
-      {
-        $project: {
-          _id: { $toString: "$_id" },
-          userId: 1,
-          friendId: 1,
-          status: 1,
-          friendUsername: "$friendDetails.username",
-        },
-      },
-    ])
-    .toArray();
+  const pipeline = pipelineMany(userId);
+  const friends = await friendsCollection.aggregate(pipeline).toArray();
 
   return friends.map((friend) => {
     return {
@@ -46,6 +14,7 @@ const query = async (userId: string): Promise<FriendModel[]> => {
       friendId: friend.friendId,
       status: friend.status,
       userName: friend.friendUsername,
+      imgUrl: friend.imgUrl,
     };
   });
 };
@@ -125,6 +94,33 @@ const remove = async (id: string): Promise<boolean> => {
   const result = await collection.deleteOne({ _id: new ObjectId(id) });
   return result.deletedCount === 1;
 };
+
+const pipelineMany = (userId: string) => [
+  {
+    $match: { userId: new ObjectId(userId) },
+  },
+  {
+    $lookup: {
+      from: "users",
+      localField: "friendId",
+      foreignField: "_id",
+      as: "friendDetails",
+    },
+  },
+  {
+    $unwind: "$friendDetails",
+  },
+  {
+    $project: {
+      _id: { $toString: "$_id" },
+      userId: 1,
+      friendId: 1,
+      status: 1,
+      friendUsername: "$friendDetails.username",
+      imgUrl: "$friendDetails.imgUrl",
+    },
+  },
+];
 
 export const friendService = {
   query,

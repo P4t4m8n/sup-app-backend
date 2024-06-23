@@ -10,8 +10,18 @@ export interface UserToCreate {
   lastName: string;
   password?: string;
   createAt?: number;
+  imgUrl?: string;
 }
 export interface UserSmallModel {
   _id: ObjectId;
   username: string;
+}
+
+export interface UserFilterModel {
+  username?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  createAt?: number;
+  imgUrl?: string;
 }

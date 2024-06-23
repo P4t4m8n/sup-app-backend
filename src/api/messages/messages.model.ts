@@ -10,4 +10,7 @@ export interface MessagesToCreate extends Document {
   updatedAt?: number | null;
   chatId: ObjectId;
   createAt?: Date;
+  status: MessageStatusType;
 }
+
+export type MessageStatusType = "sent" | "delivered" | "read";

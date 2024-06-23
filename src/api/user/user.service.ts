@@ -1,11 +1,14 @@
 import { ObjectId } from "mongodb";
 import { dbService } from "../../services/db.service";
-import { UserModel, UserToCreate } from "./user.model";
+import { UserFilterModel, UserModel, UserToCreate } from "./user.model";
 
-const query = async (filterSortBy: {}): Promise<UserModel[]> => {
+const query = async (filterSortBy: UserFilterModel): Promise<UserModel[]> => {
   const collection = await dbService.getCollection("users");
 
-  const users = await collection.find().sort({}).toArray();
+  const users = await collection
+    .find({ username: { $regex: `^${filterSortBy.username}` } })
+    .sort({})
+    .toArray();
   const fixedUsers = users.map((user) => {
     delete user.password;
     return {
@@ -15,13 +18,14 @@ const query = async (filterSortBy: {}): Promise<UserModel[]> => {
       firstName: user.firstName,
       lastName: user.lastName,
       createAt: user.createAt,
+      imgUrl: user.imgUrl,
     };
   });
 
   return fixedUsers;
 };
 
-const getById = async (id: string): Promise<UserModel | null> => {
+const getById = async (id: string | ObjectId): Promise<UserModel | null> => {
   const collection = await dbService.getCollection("users");
   const user = await collection.findOne({ _id: new ObjectId(id) });
 
@@ -34,6 +38,7 @@ const getById = async (id: string): Promise<UserModel | null> => {
       firstName: user.firstName,
       lastName: user.lastName,
       createAt: user.createAt,
+      imgUrl: user.imgUrl,
     };
   }
 
@@ -55,6 +60,7 @@ const getByUsername = async (username: string): Promise<UserModel | null> => {
     firstName: result.firstName,
     lastName: result.lastName,
     createAt: result.createAt,
+    imgUrl: result.imgUrl,
   };
   return user;
 };
@@ -79,6 +85,7 @@ const create = async (user: UserToCreate): Promise<UserModel> => {
     firstName: user.firstName,
     lastName: user.lastName,
     createAt: user.createAt,
+    imgUrl: user.imgUrl,
   };
 };
 

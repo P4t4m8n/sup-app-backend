@@ -10,6 +10,9 @@ const query = async (userId: string): Promise<ChatModel[]> => {
     .aggregate(pipeline)
     .toArray()) as ChatModel[] | null;
   if (!chats) return [];
+
+  console.log("chats:", chats[0].users[0])
+
   return chats.map((chat) => {
     return {
       _id: chat._id,
@@ -121,6 +124,7 @@ const pipelineMany = (userId: ObjectId) => [
             message: "$$message.message",
             userId: "$$message.userId",
             chatId: "$$message.chatId",
+            status: "$$message.status",
             senderUserName: "$$message.senderUserName",
             createAt: { $toDate: "$$message._id" }, // Extract creation date from _id
           },
@@ -165,6 +169,7 @@ const pipelineMany = (userId: ObjectId) => [
       users: {
         _id: 1,
         username: 1,
+        imgUrl: 1,
       },
       messages: 1,
     },

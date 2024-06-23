@@ -61,8 +61,7 @@ export const checkSession = async (req: Request, res: Response) => {
   try {
     const decrypted = authService.validateToken(token);
 
-    const userId = new ObjectId(decrypted.userId);
-    const user = await userService.getById(userId);
+    const user = await userService.getById(decrypted.userId);
     res.json({ user: user });
   } catch (err) {
     res.status(401).send({ message: "Invalid token" });
