@@ -75,3 +75,13 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(500).send({ err: "Failed to delete user" });
   }
 };
+
+export const getSmallUsersByUsername = async (req: Request, res: Response) => {
+  try {
+    const { username } = req.params;
+    const users = await userService.getUsersForFriendList(username);
+    res.json(users);
+  } catch (err) {
+    res.status(500).send({ err: "Failed to get users" });
+  }
+};

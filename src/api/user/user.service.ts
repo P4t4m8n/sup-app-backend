@@ -1,14 +1,11 @@
 import { ObjectId } from "mongodb";
 import { dbService } from "../../services/db.service";
-import { UserFilterModel, UserModel, UserToCreate } from "./user.model";
+import { UserModel, UserSmallModel, UserToCreate } from "./user.model";
 
-const query = async (filterSortBy: UserFilterModel): Promise<UserModel[]> => {
+const query = async (filterSortBy: {}): Promise<UserModel[]> => {
   const collection = await dbService.getCollection("users");
 
-  const users = await collection
-    .find({ username: { $regex: `^${filterSortBy.username}` } })
-    .sort({})
-    .toArray();
+  const users = await collection.find().sort({}).toArray();
   const fixedUsers = users.map((user) => {
     delete user.password;
     return {
@@ -85,6 +82,7 @@ const create = async (user: UserToCreate): Promise<UserModel> => {
     firstName: user.firstName,
     lastName: user.lastName,
     createAt: user.createAt,
+
     imgUrl: user.imgUrl,
   };
 };
@@ -121,6 +119,22 @@ const isUserExists = async (
   return !!result;
 };
 
+const getUsersForFriendList = async (
+  str: string
+): Promise<UserSmallModel[]> => {
+  const collection = await dbService.getCollection("users");
+  const users = await collection
+    .find({ username: { $regex: str, $options: "i" } })
+    .toArray();
+  return users.map((user) => {
+    return {
+      _id: user._id,
+      username: user.username,
+      imgUrl: user.imgUrl,
+    };
+  });
+};
+
 export const userService = {
   query,
   getById,
@@ -129,4 +143,5 @@ export const userService = {
   remove,
   getByUsername,
   isUserExists,
+  getUsersForFriendList
 };

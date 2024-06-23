@@ -13,7 +13,7 @@ const query = async (userId: string): Promise<FriendModel[]> => {
       userId: friend.userId,
       friendId: friend.friendId,
       status: friend.status,
-      userName: friend.friendUsername,
+      username: friend.friendUsername,
       imgUrl: friend.imgUrl,
     };
   });

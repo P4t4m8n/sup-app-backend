@@ -15,6 +15,8 @@ export interface UserToCreate {
 export interface UserSmallModel {
   _id: ObjectId;
   username: string;
+  imgUrl: string;
+
 }
 
 export interface UserFilterModel {

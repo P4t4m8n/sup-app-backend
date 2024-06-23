@@ -11,7 +11,6 @@ const query = async (userId: string): Promise<ChatModel[]> => {
     .toArray()) as ChatModel[] | null;
   if (!chats) return [];
 
-  console.log("chats:", chats[0].users[0])
 
   return chats.map((chat) => {
     return {
