@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { dbService } from "../../services/db.service";
 import { UserModel, UserSmallModel, UserToCreate } from "./user.model";
 
-const query = async (filterSortBy: {}): Promise<UserModel[]> => {
+const query = async (filterSortBy= {}): Promise<UserModel[]> => {
   const collection = await dbService.getCollection("users");
 
   const users = await collection.find().sort({}).toArray();
