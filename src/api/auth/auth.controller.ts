@@ -23,8 +23,18 @@ export const login = async (req: Request, res: Response) => {
 export const signup = async (req: Request, res: Response) => {
   const user = req.body;
   const { username, firstName, lastName, email, password } = req.body;
+  const imgUrl = req.body.imgUrl
+    ? req.body.imgUrl
+    : "https://res.cloudinary.com/dpnevk8db/image/upload/v1719309846/user_jxy0tq.png";
   try {
-    const newUser = await authService.signup({ username, firstName, lastName, email, password });
+    const newUser = await authService.signup({
+      username,
+      firstName,
+      lastName,
+      email,
+      password,
+      imgUrl,
+    });
     const loginUser = await authService.login(newUser.username, user.password);
     const session = await sessionService.createSession(loginUser._id);
     res.cookie("sessionId", session, {
@@ -41,6 +51,7 @@ export const signup = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
   const sessionId = req.cookies.sessionId;
 
+  console.log("sessionId", sessionId);
   try {
     if (sessionId) {
       await sessionService.deleteSession(sessionId);

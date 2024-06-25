@@ -1,3 +1,4 @@
+import { decrypt } from "dotenv";
 import { SessionModel, SessionSmallModel } from "../api/auth/auth.model";
 import { cryptr } from "../api/auth/auth.service";
 import { dbService } from "./db.service";
@@ -35,9 +36,11 @@ const validateSession = async (
   return session;
 };
 
-const deleteSession = async (sessionId: string): Promise<void> => {
+const deleteSession = async (session: string): Promise<void> => {
   const collection = await dbService.getCollection("sessions");
-  await collection.deleteOne({ _id: new ObjectId(sessionId) });
+
+  const sessionId = cryptr.decrypt(session) as unknown as SessionSmallModel;
+  await collection.deleteOne({ _id: new ObjectId(sessionId._id) });
 };
 
 export const sessionService = {

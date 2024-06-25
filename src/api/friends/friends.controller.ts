@@ -27,9 +27,10 @@ export const getFriend = async (req: Request, res: Response) => {
 };
 
 export const createFriend = async (req: Request, res: Response) => {
-  const { userId, userName } = req.body.friend;
+  const { userId, username } = req.body.friend;
+  console.log("userName:", username)
   try {
-    const userFriend = await userService.getByUsername(userName);
+    const userFriend = await userService.getByUsername(username);
     if (!userFriend) {
       res.status(404).send({ err: "User does not exist" });
       return;
